@@ -48,18 +48,6 @@ jobs:
           sudo rm -rf /etc/mysql
           sudo rm -rf /etc/php
           sudo rm -rf /etc/apt/sources.list.d
-          # 获取已安装的包列表
-          installed_packages=$(dpkg -l | awk '{print $2}')
-          # 定义需要卸载的包列表
-          packages_to_remove="azure-cli zulu hhvm llvm firefox google dotnet powershell openjdk mysql php"
-          # 遍历每个包，仅当包已安装时卸载
-          for pkg in $packages_to_remove; do
-              if echo "$installed_packages" | grep -q "^$pkg"; then
-                  sudo -E apt-get -y purge "$pkg"
-              else
-                  echo "Package $pkg is not installed, skipping..."
-              fi
-          done
           sudo -E apt-get update
 
       - name: Configuration Environment‌‌...
