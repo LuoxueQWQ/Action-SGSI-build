@@ -60,14 +60,7 @@ jobs:
                   echo "Package $pkg is not installed, skipping..."
               fi
           done
-          # 更新包列表
           sudo -E apt-get update
-          # 自动清理不再需要的依赖包
-          sudo -E apt-get -y autoremove --purge
-          # 清理下载的包文件
-          sudo -E apt-get clean
-          # 查看磁盘使用情况
-          df -h
 
       - name: Configuration Environment‌‌...
         run: |
