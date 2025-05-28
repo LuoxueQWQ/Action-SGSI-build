@@ -38,15 +38,35 @@ jobs:
       - name: Get variable configuration...
         run: |
           echo "BUILD_TIME=$(date +%s | md5sum | awk '{print substr($1,1,10)}')" >> $GITHUB_ENV
-
-      - name: Clean up the environment‌‌...
+      
+      - name: Clean up the environment
         run: |
-          docker rmi `docker images -q`
-          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
-          sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+          # 删除Docker镜像
+          docker rmi $(docker images -q) || echo "No Docker images to remove"
+          # 删除特定目录
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /etc/mysql
+          sudo rm -rf /etc/php
+          sudo rm -rf /etc/apt/sources.list.d
+          # 获取已安装的包列表
+          installed_packages=$(dpkg -l | awk '{print $2}')
+          # 定义需要卸载的包列表
+          packages_to_remove="azure-cli zulu hhvm llvm firefox google dotnet powershell openjdk mysql php"
+          # 遍历每个包，仅当包已安装时卸载
+          for pkg in $packages_to_remove; do
+              if echo "$installed_packages" | grep -q "^$pkg"; then
+                  sudo -E apt-get -y purge "$pkg"
+              else
+                  echo "Package $pkg is not installed, skipping..."
+              fi
+          done
+          # 更新包列表
           sudo -E apt-get update
+          # 自动清理不再需要的依赖包
           sudo -E apt-get -y autoremove --purge
+          # 清理下载的包文件
           sudo -E apt-get clean
+          # 查看磁盘使用情况
           df -h
 
       - name: Configuration Environment‌‌...
